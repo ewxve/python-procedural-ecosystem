@@ -1,0 +1,132 @@
+import random
+import math
+
+
+def get_random(seed, label, index: int = 0):
+    rng = random.Random(seed + hash(label))
+    if index > 0:
+        return math.floor(rng.random() * index)
+    return rng.random()
+
+
+def genus_name(seed, plant_type):
+    genus_types = {"Tree": "Arbor", "Shrub": "Fruticos", "Grass": "Gramin", "Frond": "Frond", "Vine": "Vitin", "Succulent": "Crass", "Fungoid": "Fung", "Floater": "Natan", "Flower": "Flor"}
+
+    genus_endings = ["us", "a", "um", "is", "ex", "es", "ix", "ia", "ea", "eus", "ias"]
+    return genus_types[plant_type] + genus_endings[get_random(seed, "genus_end", len(genus_endings))]
+
+
+def pick_type(seed):
+    possible_types = ["Tree", "Shrub", "Grass", "Frond", "Vine", "Succulent", "Fungoid", "Floater", "Flower"]
+    return possible_types[get_random(seed, "plant_type", len(possible_types))]
+
+
+def assign_climate(seed):
+    possible_climates = ["Tropical", "Dry", "Cold", "Hot", "Dark", "Wet", "Mountainous"]
+    return possible_climates[get_random(seed, "climate", len(possible_climates))]
+
+
+def pick_color(seed, color_type):
+    plant_colors = [
+        "olive-green",
+        "mossy green",
+        "fern-green",
+        "sage green",
+        "pine-green",
+        "lichen-green",
+        "deep green",
+        "pale green",
+        "yellow-green",
+        "blue-green",
+
+        "brownish-green",
+        "olive-brown",
+        "reddish-brown",
+        "dark brown",
+        "light brown",
+        "golden-brown",
+
+        "burgundy-red",
+        "deep-red",
+        "wine-red",
+        "purple-red",
+        "plum-purple",
+        "dusky-purple",
+
+        "pale-yellow",
+        "golden-yellow",
+        "straw-yellow",
+        "muted-yellow",
+
+        "blue-green",
+        "teal-blue",
+        "grayish-blue",
+        "muted-blue",
+
+        "cream-colored",
+        "off-white",
+        "ivory-white",
+        "pale-beige",
+
+        "dark-green-black",
+        "olive-black",
+        "charcoal-green",
+    ]
+
+def species_name(seed, plant_traits):
+    named_traits = ["preferred_climate"]
+    trait_dictionary = {
+        ### CLIMATES
+        "Tropical": "tropic",
+        "Dry": "adsicc",
+        "Cold": "frigid",
+        "Hot": "fervid",
+        "Dark": "obscur",
+        "Wet": "aquilent",
+        "Mountainous": "montan"
+    }
+
+    selected_trait = named_traits[math.floor(get_random(seed, "species_trait", len(named_traits)))]
+    print(plant_traits[selected_trait])
+
+    selected_base = trait_dictionary[plant_traits[selected_trait]]
+
+    species_endings = ["alia", "ius", "us", "anus", "a", "ensis", "imus", "issimus", "ia", "ium", "ada", "um", "ensus", "ae", "iae", "iferum", "ifus", "idae", "ida", "alis", "alus", "is"]
+    selected_ending = species_endings[math.floor(get_random(seed, "species_ending", len(species_endings)))]
+    return selected_base + selected_ending
+
+
+def generate_plant():
+    seed = random.randint(10000, 99999)
+
+    new_plant = {
+        "size_mult": "",
+        "color_palette": "",
+        "stem_color_pos": "",
+        "leaf_color_pos": "",
+        "fruit_color_pos": "",
+        "plant_type": "",
+        "genus_name": "",
+        "species_name": "",
+        "human_edible_bool": "",
+        "poison_touch": "",
+        "thorny_bool": "",
+        "preferred_climate": "",
+        "other_material": "",
+    }
+
+    new_plant["size_mult"] = round(get_random(seed, "size_mult", 0) * 2, 3)
+    new_plant["plant_type"] = pick_type(seed)
+    new_plant["genus_name"] = genus_name(seed, new_plant["plant_type"])
+    new_plant["preferred_climate"] = assign_climate(seed)
+    new_plant["species_name"] = species_name(seed, new_plant)
+
+    print(f"""
+    Plant Name: {new_plant["genus_name"]} {new_plant["species_name"]}
+    Plant Type: {new_plant["plant_type"]}
+    Species Size: {new_plant["size_mult"]}x
+    Description: {new_plant["genus_name"]} {new_plant["species_name"]} is a {new_plant["plant_type"].lower()}-type plant that is primarily found in {new_plant["preferred_climate"].lower()} climates
+    """)
+
+
+generate_plant()
