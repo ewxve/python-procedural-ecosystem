@@ -28,50 +28,50 @@ def assign_climate(seed):
 
 def pick_color(seed, color_type):
     plant_colors = [
-        "olive-green",
+        "olive green",
         "mossy green",
         "fern-green",
         "sage green",
         "pine-green",
-        "lichen-green",
         "deep green",
         "pale green",
         "yellow-green",
         "blue-green",
 
         "brownish-green",
-        "olive-brown",
         "reddish-brown",
         "dark brown",
         "light brown",
         "golden-brown",
 
-        "burgundy-red",
-        "deep-red",
+        "burgundy",
+        "deep red",
         "wine-red",
-        "purple-red",
-        "plum-purple",
-        "dusky-purple",
 
-        "pale-yellow",
+        "plum-purple",
+        "dark purple",
+        "pale magenta",
+
+        "pale yellow",
         "golden-yellow",
-        "straw-yellow",
-        "muted-yellow",
+        "straw-colored",
+        "muted yellow",
 
         "blue-green",
-        "teal-blue",
-        "grayish-blue",
-        "muted-blue",
+        "teal",
+        "blue-gray",
+        "muted blue",
 
         "cream-colored",
         "off-white",
         "ivory-white",
-        "pale-beige",
-
-        "dark-green-black",
-        "olive-black",
-        "charcoal-green",
+        "beige",
+        "gray",
+        "bright white",
     ]
+
+    return plant_colors[math.floor(get_random(seed, color_type, len(plant_colors)))]
+
 
 def species_name(seed, plant_traits):
     named_traits = ["preferred_climate"]
@@ -87,13 +87,22 @@ def species_name(seed, plant_traits):
     }
 
     selected_trait = named_traits[math.floor(get_random(seed, "species_trait", len(named_traits)))]
-    print(plant_traits[selected_trait])
 
     selected_base = trait_dictionary[plant_traits[selected_trait]]
 
     species_endings = ["alia", "ius", "us", "anus", "a", "ensis", "imus", "issimus", "ia", "ium", "ada", "um", "ensus", "ae", "iae", "iferum", "ifus", "idae", "ida", "alis", "alus", "is"]
     selected_ending = species_endings[math.floor(get_random(seed, "species_ending", len(species_endings)))]
     return selected_base + selected_ending
+
+
+def decide_fruit(seed, plant_type):
+    fruitful_plants = ["Tree", "Shrub", "Vine"]
+    if plant_type in fruitful_plants:
+        if get_random(seed, "fruit", 6) < 1:
+            return "edible"
+        elif get_random(seed, "fruit", 6) < 2:
+            return "poisonous"
+    return "none"
 
 
 def generate_plant():
@@ -112,20 +121,30 @@ def generate_plant():
         "poison_touch": "",
         "thorny_bool": "",
         "preferred_climate": "",
+        "fruit_type": "",
         "other_material": "",
     }
 
-    new_plant["size_mult"] = round(get_random(seed, "size_mult", 0) * 2, 3)
+    new_plant["size_mult"] = round(get_random(seed, "size_mult", 0) * 2, 2)
     new_plant["plant_type"] = pick_type(seed)
     new_plant["genus_name"] = genus_name(seed, new_plant["plant_type"])
     new_plant["preferred_climate"] = assign_climate(seed)
     new_plant["species_name"] = species_name(seed, new_plant)
 
+    new_plant["stem_color_pos"] = pick_color(seed, "stem_color")
+    leafy_plants = ["Tree", "Shrub", "Vine", "Frond", "Flower"]
+    new_plant["leaf_color_pos"] = pick_color(seed, "leaf_color") if new_plant["plant_type"] in leafy_plants else "None"
+    new_plant["fruit_color_pos"] = pick_color(seed, "fruit_color")
+
+    new_plant["fruit_type"] = decide_fruit(seed, new_plant["plant_type"])
+
+    colors_sentence = f"It has a {new_plant['stem_color_pos']} stem and {new_plant['leaf_color_pos']} leaves" if new_plant["leaf_color_pos"] != "None" else f"The whole plant is {new_plant['stem_color_pos']}"
+    fruit_sentence = f"It also has {new_plant['fruit_type']}, {new_plant['fruit_color_pos']} fruits growing off of it." if new_plant["fruit_type"] != "none" else ""
     print(f"""
     Plant Name: {new_plant["genus_name"]} {new_plant["species_name"]}
     Plant Type: {new_plant["plant_type"]}
     Species Size: {new_plant["size_mult"]}x
-    Description: {new_plant["genus_name"]} {new_plant["species_name"]} is a {new_plant["plant_type"].lower()}-type plant that is primarily found in {new_plant["preferred_climate"].lower()} climates
+    Description: {new_plant["genus_name"]} {new_plant["species_name"]} is a {new_plant["plant_type"].lower()}-like plant that is primarily found in {new_plant["preferred_climate"].lower()} climates. {colors_sentence}. {fruit_sentence}
     """)
 
 
