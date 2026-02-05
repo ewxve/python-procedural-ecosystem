@@ -10,14 +10,14 @@ def get_random(seed, label, index: int = 0):
 
 
 def genus_name(seed, plant_type):
-    genus_types = {"Tree": "Arbor", "Shrub": "Fruticos", "Grass": "Gramin", "Frond": "Frond", "Vine": "Vitin", "Succulent": "Crass", "Fungoid": "Fung", "Floater": "Natan", "Flower": "Flor"}
+    genus_types = {"Tree": "Arbor", "Shrub": "Fruticos", "Grass": "Gramin", "Frond": "Frond", "Vine": "Vitin", "Succulent": "Crass", "Fungoid": "Fung", "Hydrophyte": "Natan", "Flower": "Flor"}
 
     genus_endings = ["us", "a", "um", "is", "ex", "es", "ix", "ia", "ea", "eus", "ias"]
     return genus_types[plant_type] + genus_endings[get_random(seed, "genus_end", len(genus_endings))]
 
 
 def pick_type(seed):
-    possible_types = ["Tree", "Shrub", "Grass", "Frond", "Vine", "Succulent", "Fungoid", "Floater", "Flower"]
+    possible_types = ["Tree", "Shrub", "Grass", "Frond", "Vine", "Succulent", "Fungoid", "Hydrophyte", "Flower"]
     return possible_types[get_random(seed, "plant_type", len(possible_types))]
 
 
@@ -74,19 +74,74 @@ def pick_color(seed, color_type):
 
 
 def species_name(seed, plant_traits):
-    named_traits = ["preferred_climate"]
+    named_traits = ["preferred_climate", "thorn_type", "stem_color_pos", "leaf_color_pos", "fruit_color_pos"]
     trait_dictionary = {
         ### CLIMATES
-        "Tropical": "tropic",
-        "Dry": "adsicc",
+        "Tropical": "trop",
+        "Dry": "arid",
         "Cold": "frigid",
         "Hot": "fervid",
         "Dark": "obscur",
-        "Wet": "aquilent",
-        "Mountainous": "montan"
+        "Wet": "madens",
+        "Mountainous": "montan",
+
+        ### THORNS
+        "thorned branches": "sent",
+        "spined leaves": "spinos",
+        "a barbed stem": "hamat",
+        "a needle-covered stem": "ac",
+        "hooked thorns on the stem": "ham",
+        "toothed leaves": "dens",
+        "razor-edged leaves": "novac",
+        "prickle-covered bark": "acul",
+        "a bristled stem": "set",
+
+        ### COLORS
+        "olive green": "oliv",
+        "mossy green": "musc",
+        "fern-green": "fil",
+        "sage green": "sag",
+        "pine-green": "pin",
+        "deep green": "virid",
+        "pale green": "virid",
+        "yellow-green": "pall",
+        "blue-green": "callain",
+
+        "brownish-green": "terr",
+        "reddish-brown": "ferr",
+        "dark brown": "fusc",
+        "light brown": "fusc",
+        "golden-brown": "aer",
+
+        "burgundy": "ferr",
+        "deep red": "rub",
+        "wine-red": "vin",
+
+        "plum-purple": "purpur",
+        "dark purple": "purpur",
+        "pale magenta": "magent",
+
+        "pale yellow": "stramin",
+        "golden-yellow": "aur",
+        "straw-colored": "stramin",
+        "muted yellow": "lut",
+
+        "teal": "callain",
+        "blue-gray": "caerul",
+        "muted blue": "caerul",
+
+        "cream-colored": "creum",
+        "off-white": "subalb",
+        "ivory-white": "alb",
+        "beige": "creum",
+        "gray": "gris",
+        "bright white": "alb",
     }
 
     selected_trait = named_traits[math.floor(get_random(seed, "species_trait", len(named_traits)))]
+    while plant_traits[selected_trait].lower() == "none" or plant_traits[selected_trait].lower() == "":
+        seed += 1
+        selected_trait = named_traits[math.floor(get_random(seed, "species_trait", len(named_traits)))]
 
     selected_base = trait_dictionary[plant_traits[selected_trait]]
 
@@ -105,6 +160,40 @@ def decide_fruit(seed, plant_type):
     return "none"
 
 
+def decide_thorns(seed, plant_type):
+    thorn_chance = 0
+    exclusions = []
+    match plant_type:
+        case "Vine":
+            thorn_chance = 0.3
+            exclusions = ["thorned branches", "prickle-covered bark"]
+        case "Shrub":
+            thorn_chance = 0.1
+            exclusions = ["a barbed stem", "a needle-covered stem", "hooked thorns on the stem", "prickle-covered bark", "a bristled stem"]
+        case "Succulent":
+            thorn_chance = 0.25
+            exclusions = ["thorned branches", "spined leaves", "toothed leaves", "razor-edged leaves", "prickle-covered bark"]
+        case "Flower":
+            thorn_chance = 0.075
+            exclusions = ["thorned branches", "prickle-covered bark"]
+        case "Tree":
+            thorn_chance = 0.1
+            exclusions = ["a barbed stem", "a needle-covered stem", "hooked thorns on the stem", "a bristled stem"]
+        case _:
+            thorn_chance = 0
+    if thorn_chance != 0:
+        if get_random(seed, "has_thorns") <= thorn_chance:
+            return decide_thorn_type(seed, exclusions)
+    return "none"
+
+
+def decide_thorn_type(seed, exclusions):
+    thorn_type_list = ["thorned branches", "spined leaves", "a barbed stem", "a needle-covered stem", "hooked thorns on the stem", "toothed leaves", "razor-edged leaves", "prickle-covered bark", "a bristled stem"]
+    for thorn_type in exclusions:
+        thorn_type_list.remove(thorn_type)
+    return thorn_type_list[math.floor(get_random(seed, "thorn_type", len(thorn_type_list)))]
+
+
 def generate_plant():
     seed = random.randint(10000, 99999)
 
@@ -119,7 +208,7 @@ def generate_plant():
         "species_name": "",
         "human_edible_bool": "",
         "poison_touch": "",
-        "thorny_bool": "",
+        "thorn_type": "",
         "preferred_climate": "",
         "fruit_type": "",
         "other_material": "",
@@ -129,7 +218,6 @@ def generate_plant():
     new_plant["plant_type"] = pick_type(seed)
     new_plant["genus_name"] = genus_name(seed, new_plant["plant_type"])
     new_plant["preferred_climate"] = assign_climate(seed)
-    new_plant["species_name"] = species_name(seed, new_plant)
 
     new_plant["stem_color_pos"] = pick_color(seed, "stem_color")
     leafy_plants = ["Tree", "Shrub", "Vine", "Frond", "Flower"]
@@ -138,13 +226,22 @@ def generate_plant():
 
     new_plant["fruit_type"] = decide_fruit(seed, new_plant["plant_type"])
 
-    colors_sentence = f"It has a {new_plant['stem_color_pos']} stem and {new_plant['leaf_color_pos']} leaves" if new_plant["leaf_color_pos"] != "None" else f"The whole plant is {new_plant['stem_color_pos']}"
+    new_plant["thorn_type"] = decide_thorns(seed, new_plant["plant_type"])
+
+    new_plant["species_name"] = species_name(seed, new_plant)
+
+    type_sentences = [f"is a {new_plant['plant_type'].lower()}-type plant", f"is a {new_plant['plant_type'].lower()}-like species", f"is a type of {new_plant['plant_type'].lower()}"]
+    type_sentence = type_sentences[math.floor(get_random(seed, "type_sentence", len(type_sentences)))]
+
+    colors_sentence = f"It has {'an' if new_plant['stem_color_pos'][0].lower() in 'aeiou' else 'a'} {new_plant['stem_color_pos']} stem and {new_plant['leaf_color_pos']} leaves" if new_plant["leaf_color_pos"] != "None" else f"The whole plant is {new_plant['stem_color_pos']}"
     fruit_sentence = f"It also has {new_plant['fruit_type']}, {new_plant['fruit_color_pos']} fruits growing off of it." if new_plant["fruit_type"] != "none" else ""
+    thorns_sentence = f"This species evolved {new_plant['thorn_type']} to fend off predators." if new_plant["thorn_type"] != "none" else ""
+
     print(f"""
     Plant Name: {new_plant["genus_name"]} {new_plant["species_name"]}
     Plant Type: {new_plant["plant_type"]}
     Species Size: {new_plant["size_mult"]}x
-    Description: {new_plant["genus_name"]} {new_plant["species_name"]} is a {new_plant["plant_type"].lower()}-like plant that is primarily found in {new_plant["preferred_climate"].lower()} climates. {colors_sentence}. {fruit_sentence}
+    Description: {new_plant["genus_name"]} {new_plant["species_name"]} {type_sentence} primarily found in {new_plant["preferred_climate"].lower()} climates. {colors_sentence}. {fruit_sentence} {thorns_sentence}
     """)
 
 
